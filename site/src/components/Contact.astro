@@ -35,7 +35,7 @@ const tel = offer.contact.phone.replace(/\s/g, '');
       </div>
       <div class="row">
         <label><span>Nagłośnienie</span>
-          <select name="sound">{offer.sound.map(s => <option value={s.id}>{s.id}: {s.label}</option>)}</select>
+          <select name="sound">{offer.sound.map(s => <option value={s.id}>{s.label}</option>)}</select>
         </label>
         <label><span>Budżet (opcjonalnie)</span><input name="budget" inputmode="numeric" placeholder="np. 3000 zł" /></label>
       </div>
