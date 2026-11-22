@@ -1,0 +1,61 @@
+---
+import { Picture } from 'astro:assets';
+import sofa from '../assets/photos/band-sofa.jpg';
+import band from '../data/band.json';
+---
+<section class="section chronicle" id="kronika">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <p class="label">Kronika Sherocky</p>
+      <h2>Rozdział<br />pierwszy</h2>
+    </header>
+
+    <div class="story">
+      <figure class="photo reveal">
+        <Picture src={sofa} alt="Zespół na czerwonej kanapie w sali prób" formats={['avif', 'webp']} widths={[640, 1200, 1800]} sizes="(min-width: 60rem) 50vw, 100vw" />
+        <figcaption class="mono muted">Sala prób, lipiec 2024. Skład niepełny, Bartek był zajęty byciem legendą gdzie indziej.</figcaption>
+      </figure>
+      <div class="text reveal">
+        <p class="drop">Wydarzenia dotyczące powstania zespołu, znane historykom, sięgają zamierzchłych czasów. Koncertował wtedy legendarny (przynajmniej na szczeblu gminnym) zespół <strong>Brand New Cadillacs</strong>. Niejeden bar pękał w szwach, stoły latały, rock'n'roll panował na świecie, a wszelkie zasady zostawały poddane w wątpliwość.</p>
+        <p>Około 2015 roku naszej ery do legendy dołącza młody Sziroky. Akurat skończył 16 lat i widział potężne wykonanie „I Love Rock'n'Roll” w wersji Cadillaców. Wiechu bierze go w obroty i tak otwierają się drzwi do zupełnie nowej przygody.</p>
+        <p>Ta przygoda trwa do dziś i ma jeszcze parę rozdziałów do opowiedzenia. Sherocky to dla nas wolna, niczym nieograniczona energia, która nie zostaje na scenie, tylko przejmuje całe pomieszczenie.</p>
+      </div>
+    </div>
+
+    <div class="members" id="sklad">
+      <p class="label reveal">Akta osobowe · {band.members.length} sztuk</p>
+      <ol class="files">
+        {band.members.map((m, i) => (
+          <li class="file reveal">
+            <span class="no mono">Akta nr {String(i + 1).padStart(3, '0')}</span>
+            <h3>{m.nick}</h3>
+            <p class="mono role">{m.role} · {m.name}</p>
+            <p class="note">{m.note}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .chronicle { background: var(--surface); }
+  .story { display: grid; gap: 2.5rem; align-items: start; }
+  @media (min-width: 60rem) { .story { grid-template-columns: 1fr 1fr; gap: 4rem; } }
+  .photo { margin: 0; display: grid; gap: .75rem; }
+  .photo :global(img) { aspect-ratio: 4 / 3; object-fit: cover; }
+  .photo figcaption { font-size: .8125rem; line-height: 1.5; }
+  .text p { font-size: 1.0625em; }
+  .drop::first-letter {
+    float: left; font-family: var(--f-display); font-weight: 800; font-size: 5.2em; line-height: .8;
+    margin: .08em .1em 0 0; color: var(--amber);
+  }
+  .members { margin-top: clamp(4rem, 8vw, 6rem); display: grid; gap: 1.5rem; }
+  .files { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+  .file { background: var(--ink); padding: 1.5rem; display: grid; gap: .5rem; align-content: start; transition: background .3s var(--ease); }
+  .file:hover { background: var(--wood); }
+  .no { font-size: .6875rem; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
+  .file h3 { font-size: 2.25rem; }
+  .role { font-size: .75rem; color: var(--muted); letter-spacing: .04em; margin: 0; }
+  .note { font-size: .9375rem; margin: .5rem 0 0; }
+</style>

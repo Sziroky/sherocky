@@ -1,0 +1,49 @@
+---
+import { u } from '../scripts/url';
+import offer from '../data/offer.json';
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+---
+<section class="section pills" id="piguly">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <p class="label">Oferta · 3 Piguły</p>
+      <h2>Wybierz<br />swoją Pigułę</h2>
+      <p>Trzy zestawy na różne okazje. Każdy zagramy w formacie 30, 60 lub 90 minut. Dawkowanie dowolne, skutki uboczne: zdarte gardła i przesunięte stoły.</p>
+    </header>
+    <ol class="list">
+      {offer.pills.map((p, i) => (
+        <li class="pill reveal">
+          <span class="num mono">0{i + 1}</span>
+          <div class="body">
+            <h3>{p.name}</h3>
+            <p class="short">{p.short}</p>
+            {!compact && <p class="muted">{p.long}</p>}
+          </div>
+          <ul class="examples mono" aria-label="Przykładowe utwory">
+            {p.examples.map(s => <li class={s.startsWith('[') ? 'todo' : ''}>{s}</li>)}
+          </ul>
+        </li>
+      ))}
+    </ol>
+    {compact && <p class="more reveal"><a class="link" href={u('/oferta')}>Cennik, kalkulator i rider →</a></p>}
+  </div>
+</section>
+
+<style>
+  .list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .pill {
+    display: grid; gap: 1rem 2rem; padding: 2rem 0; border-bottom: 1px solid var(--line);
+    grid-template-columns: 3rem 1fr;
+  }
+  .num { color: var(--amber); font-size: .875rem; padding-top: .5rem; }
+  .short { font-size: 1.25em; margin: .75rem 0 .5rem; }
+  .examples { grid-column: 2; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; font-size: .8125rem; color: var(--muted); }
+  @media (min-width: 60rem) {
+    .pill { grid-template-columns: 4rem 1.4fr 1fr; align-items: start; padding: 2.75rem 0; }
+    .examples { grid-column: 3; flex-direction: column; padding-top: .75rem; }
+  }
+  .pill h3 { transition: color .3s var(--ease); }
+  .pill:hover h3 { color: var(--amber); }
+  .more { margin-top: 2rem; }
+</style>

@@ -1,0 +1,9 @@
+# lokalne / prywatne: nie trafia do publicznego repo
+docs/
+assets/raw/
+assets/contact-sheets/
+# build
+node_modules/
+site/dist/
+site/.astro/
+.DS_Store

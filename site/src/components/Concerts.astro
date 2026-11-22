@@ -1,0 +1,72 @@
+---
+import { u } from '../scripts/url';
+import { upcoming, past, parts, isExample } from '../scripts/concerts';
+interface Props { limit?: number; showAll?: boolean }
+const { limit = 4, showAll = false } = Astro.props;
+const up = showAll ? upcoming() : upcoming().slice(0, limit);
+const done = showAll ? past() : past().slice(0, 3);
+---
+<section class="section concerts" id="koncerty">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <p class="label">Koncerty</p>
+      <h2>Gdzie nas<br />złapać</h2>
+      {isExample && <p><span class="preview-note">Podgląd: dane testowe. Docelowo z Kalendarza Google</span></p>}
+    </header>
+
+    {up.length ? (
+      <ol class="gigs reveal">
+        {up.map(g => {
+          const d = parts(g.date);
+          return (
+            <li class="gig">
+              <time class="date" datetime={g.date}><span class="day">{d.day}</span><span class="mono">{d.mon} {d.year}</span></time>
+              <div class="what">
+                <h3>{g.private ? 'Wydarzenie prywatne' : g.title}</h3>
+                <p class="mono muted">{g.place}{!g.private && ` · ${d.time}`}</p>
+              </div>
+              {g.link && <a class="btn btn--ghost" href={g.link} rel="noopener">Szczegóły</a>}
+            </li>
+          );
+        })}
+      </ol>
+    ) : (
+      <p class="empty reveal">Kalendarz pusty, ale to się da naprawić. <a class="link" href={u('/oferta#zapytanie')}>Zaproś nas →</a></p>
+    )}
+
+    {done.length > 0 && (
+      <div class="past reveal">
+        <p class="label">Zagraliśmy</p>
+        <ul>
+          {done.map(g => {
+            const d = parts(g.date);
+            return <li><span class="mono muted">{d.day} {d.mon} {d.year}</span> {g.private ? 'Wydarzenie prywatne' : g.title} <span class="muted">· {g.place}</span></li>;
+          })}
+        </ul>
+      </div>
+    )}
+    {!showAll && <p class="more reveal"><a class="link" href={u('/koncerty')}>Wszystkie koncerty →</a></p>}
+  </div>
+</section>
+
+<style>
+  .gigs { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .gig {
+    display: grid; grid-template-columns: 5.5rem 1fr; gap: 1rem 1.5rem; align-items: center;
+    padding: 1.5rem 0; border-bottom: 1px solid var(--line);
+    transition: background .3s var(--ease);
+  }
+  .gig:hover { background: linear-gradient(90deg, rgb(238 142 55 / .06), transparent 60%); }
+  .gig .btn { grid-column: 2; justify-self: start; min-height: 2.75rem; }
+  @media (min-width: 48rem) { .gig { grid-template-columns: 7rem 1fr auto; } .gig .btn { grid-column: 3; } }
+  .date { display: grid; line-height: 1; }
+  .day { font-family: var(--f-display); font-weight: 800; font-size: 3.5rem; color: var(--amber); }
+  .date .mono { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .what h3 { font-size: clamp(1.5rem, 1.2rem + 1vw, 2.125rem); }
+  .what p { margin: .4rem 0 0; font-size: .875rem; }
+  .past { margin-top: 3.5rem; display: grid; gap: 1rem; }
+  .past ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+  .past .mono { font-size: .8125rem; margin-right: .5rem; }
+  .empty { font-size: 1.25em; }
+  .more { margin-top: 2rem; }
+</style>

@@ -1,0 +1,169 @@
+---
+import { u } from '../scripts/url';
+import '../styles/global.css';
+import wordmark from '../assets/wordmark.svg?raw';
+import offer from '../data/offer.json';
+
+interface Props { title?: string; description?: string; lang?: 'pl' | 'en'; }
+const {
+  title = 'Sherocky: rock\'n\'roll na żywo · koncerty, dni gminy, zloty, wesela',
+  description = 'Pięciu kumpli z Opolszczyzny i rock\'n\'roll, który przejmuje całą salę. Zarezerwuj koncert.',
+  lang = 'pl',
+} = Astro.props;
+const en = lang === 'en';
+const nav = en
+  ? [[u('/en#offer'), 'Offer'], [u('/en#concerts'), 'Concerts'], [u('/en#contact'), 'Contact']]
+  : [[u('/oferta'), 'Oferta'], [u('/koncerty'), 'Koncerty'], [u('/#kronika'), 'Kronika'], [u('/#kontakt'), 'Kontakt']];
+const bookHref = u(en ? '/en#contact' : '/oferta#zapytanie');
+---
+<!doctype html>
+<html lang={lang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#0F0C0B" />
+  <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
+</head>
+<body>
+  <a class="visually-hidden" href="#main">{en ? 'Skip to content' : 'Przejdź do treści'}</a>
+
+  <header class="site-header">
+    <div class="wrap bar">
+      <a href={u(en ? '/en' : '/')} class="brand" aria-label="Sherocky: strona główna" set:html={wordmark} />
+      <nav class="nav" aria-label={en ? 'Main' : 'Główna nawigacja'}>
+        <ul id="menu">
+          {nav.map(([href, label]) => <li><a href={href}>{label}</a></li>)}
+          <li class="lang"><a href={u(en ? '/' : '/en')} hreflang={en ? 'pl' : 'en'}>{en ? 'PL' : 'EN'}</a></li>
+        </ul>
+        <a class="btn btn-head" href={bookHref}>{en ? 'Book us' : 'Zarezerwuj'}</a>
+        <button class="menu-toggle" aria-expanded="false" aria-controls="menu">
+          <span class="visually-hidden">Menu</span><span class="burger" aria-hidden="true"></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main"><slot /></main>
+
+  <footer class="site-footer">
+    <div class="wrap foot">
+      <div class="foot-brand" set:html={wordmark} />
+      <div class="foot-cols">
+        <div>
+          <p class="label">{en ? 'Bookings' : 'Koncerty i rezerwacje'}</p>
+          <p><a class="link" href={`mailto:${offer.contact.email}`}>{offer.contact.email}</a><br />
+          <a class="link" href={`tel:${offer.contact.phone.replace(/\s/g, '')}`}>{offer.contact.phone}</a> · {offer.contact.person}</p>
+        </div>
+        <div>
+          <p class="label">Social</p>
+          <p><a class="link" href={offer.contact.instagram} rel="noopener">Instagram</a></p>
+        </div>
+      </div>
+      <p class="mono muted small">© {new Date().getFullYear()} Sherocky · {en ? 'legendary, at least at the municipal level' : 'legendarni, przynajmniej na szczeblu gminnym'}</p>
+    </div>
+  </footer>
+
+  <a class="sticky-cta btn" href={bookHref} data-sticky-cta>{en ? 'Book a concert' : 'Zarezerwuj koncert'} <span class="arrow" aria-hidden="true">→</span></a>
+
+  <script>
+    // menu mobilne
+    const t = document.querySelector<HTMLButtonElement>('.menu-toggle');
+    const header = document.querySelector('.site-header');
+    t?.addEventListener('click', () => {
+      const open = t.getAttribute('aria-expanded') === 'true';
+      t.setAttribute('aria-expanded', String(!open));
+      header?.classList.toggle('is-open', !open);
+    });
+    document.querySelectorAll('#menu a').forEach(a => a.addEventListener('click', () => {
+      t?.setAttribute('aria-expanded', 'false'); header?.classList.remove('is-open');
+    }));
+    // tło nagłówka po przewinięciu
+    const onScroll = () => header?.classList.toggle('is-scrolled', scrollY > 40);
+    addEventListener('scroll', onScroll, { passive: true }); onScroll();
+    // sticky CTA: chowa się przy formularzu / hero CTA
+    const cta = document.querySelector('[data-sticky-cta]');
+    const hiders = document.querySelectorAll('[data-hide-sticky]');
+    const visible = new Set();
+    const io = new IntersectionObserver(es => {
+      es.forEach(e => e.isIntersecting ? visible.add(e.target) : visible.delete(e.target));
+      cta?.classList.toggle('is-hidden', visible.size > 0);
+    });
+    hiders.forEach(h => io.observe(h));
+    // reveal
+    const rv = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('is-in'); rv.unobserve(e.target); }
+    }), { rootMargin: '0px 0px -10% 0px' });
+    document.querySelectorAll('.reveal').forEach(el => rv.observe(el));
+  </script>
+
+  <style>
+    .site-header {
+      position: fixed; inset: 0 0 auto; z-index: 50;
+      transition: background .3s var(--ease), border-color .3s var(--ease);
+      border-bottom: 1px solid transparent;
+    }
+    .site-header.is-scrolled, .site-header.is-open { background: rgb(15 12 11 / .94); border-color: var(--line); }
+    .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: 4.5rem; }
+    .brand { display: block; width: 8.5rem; color: var(--cream); }
+    .brand :global(svg) { width: 100%; height: auto; display: block; }
+    .nav { display: flex; align-items: center; gap: 1.5rem; }
+    .nav ul { list-style: none; display: flex; gap: 1.75rem; margin: 0; padding: 0; }
+    .nav ul a {
+      font-family: var(--f-mono); font-size: .8125rem; letter-spacing: .14em; text-transform: uppercase;
+      text-decoration: none; color: var(--cream); padding-block: .5rem;
+      background: linear-gradient(var(--amber), var(--amber)) left bottom / 0 1px no-repeat;
+      transition: background-size .3s var(--ease), color .3s;
+    }
+    .nav ul a:hover { color: var(--amber); background-size: 100% 1px; }
+    .lang a { color: var(--muted) !important; }
+    .btn-head { min-height: 2.75rem; padding: .6rem 1.1rem; }
+    .menu-toggle { display: none; }
+
+    @media (max-width: 52rem) {
+      .btn-head { display: none; }
+      .menu-toggle {
+        display: grid; place-items: center; width: 3rem; height: 3rem;
+        background: none; border: 1px solid var(--line); color: var(--cream); cursor: pointer;
+      }
+      .burger, .burger::before, .burger::after {
+        content: ''; display: block; width: 1.25rem; height: 1.5px; background: currentColor;
+        transition: transform .3s var(--ease), opacity .2s;
+      }
+      .burger { position: relative; }
+      .burger::before { position: absolute; top: -6px; }
+      .burger::after { position: absolute; top: 6px; }
+      [aria-expanded='true'] .burger { background: transparent; }
+      [aria-expanded='true'] .burger::before { transform: translateY(6px) rotate(45deg); }
+      [aria-expanded='true'] .burger::after { transform: translateY(-6px) rotate(-45deg); }
+      .nav ul {
+        position: fixed; inset: 4.5rem 0 auto; flex-direction: column; gap: 0;
+        background: var(--ink); border-bottom: 1px solid var(--line);
+        padding: 1rem var(--gutter) 2rem;
+        transform: translateY(-120%); transition: transform .4s var(--ease); z-index: -1;
+      }
+      .site-header.is-open .nav ul { transform: none; }
+      .nav ul a { display: block; padding-block: 1rem; font-size: 1rem; border-bottom: 1px solid var(--line); background: none; }
+    }
+
+    .sticky-cta {
+      position: fixed; left: var(--gutter); right: var(--gutter); bottom: max(1rem, env(safe-area-inset-bottom));
+      z-index: 40; box-shadow: 0 10px 30px rgb(0 0 0 / .5);
+      transition: transform .35s var(--ease), opacity .35s var(--ease);
+    }
+    .sticky-cta.is-hidden { transform: translateY(150%); opacity: 0; pointer-events: none; }
+    @media (min-width: 52.01rem) { .sticky-cta { display: none; } }
+
+    .site-footer { border-top: 1px solid var(--line); padding: 4rem 0 7rem; background: var(--surface); }
+    .foot { display: grid; gap: 2.5rem; }
+    .foot-brand { width: min(100%, 34rem); color: var(--cream); opacity: .9; }
+    .foot-brand :global(svg) { width: 100%; height: auto; }
+    .foot-cols { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+    .foot-cols .label { margin-bottom: .75rem; }
+    .small { font-size: .75rem; letter-spacing: .06em; margin: 0; }
+    @media (min-width: 52.01rem) { .site-footer { padding-bottom: 4rem; } }
+  </style>
+</body>
+</html>

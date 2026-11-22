@@ -1,0 +1,217 @@
+---
+import { u } from '../scripts/url';
+import offer from '../data/offer.json';
+interface Props { full?: boolean }
+const { full = false } = Astro.props;
+---
+<section class="section calc" id="wycena">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <p class="label">Wycena w 30 sekund</p>
+      <h2>Ile kosztuje<br />rock'n'roll?</h2>
+      <p>Szacunek od ręki. Ostateczną wycenę dostaniesz od {offer.contact.personGen} w ciągu 24 godzin.</p>
+      {offer.pricesAreExample && <p><span class="preview-note">Podgląd: ceny przykładowe</span></p>}
+    </header>
+
+    <div class="calc-box reveal" data-calc data-full={full ? '1' : '0'}>
+      {full && (
+        <div class="modes" role="tablist" aria-label="Tryb kalkulatora">
+          <button role="tab" aria-selected="true" data-mode="forward">Wybieram występ → cena</button>
+          <button role="tab" aria-selected="false" data-mode="reverse">Mam budżet → co dostanę</button>
+        </div>
+      )}
+
+      <form class="forward" data-panel="forward" onsubmit="return false">
+        <fieldset>
+          <legend class="label">Format</legend>
+          <div class="opts">
+            {offer.formats.map((f, i) => (
+              <label class="opt"><input type="radio" name="format" value={f.id} checked={i === 1} /><span><b>{f.label}</b><small>{f.hint}</small></span></label>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="label">Piguła</legend>
+          <div class="opts">
+            {offer.pills.map((p, i) => (
+              <label class="opt"><input type="radio" name="pill" value={p.id} checked={i === 0} /><span><b>{p.name}</b></span></label>
+            ))}
+          </div>
+        </fieldset>
+        {full && (
+          <>
+            <fieldset>
+              <legend class="label">Nagłośnienie</legend>
+              <div class="opts">
+                {offer.sound.map((s, i) => (
+                  <label class="opt"><input type="radio" name="sound" value={s.id} checked={i === 0} /><span><b>{s.label}</b><small>{s.hint}</small></span></label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend class="label">Dojazd</legend>
+              <div class="opts">
+                {offer.zones.map((z, i) => (
+                  <label class="opt"><input type="radio" name="zone" value={z.id} checked={i === 0} /><span><b>{z.label}</b><small>{z.hint}</small></span></label>
+                ))}
+              </div>
+            </fieldset>
+          </>
+        )}
+      </form>
+
+      {full && (
+        <form class="reverse" data-panel="reverse" hidden onsubmit="return false">
+          <label class="field">
+            <span class="label">Budżet (zł)</span>
+            <input type="number" name="budget" inputmode="numeric" min="0" step="100" value="3000" />
+          </label>
+          <fieldset>
+            <legend class="label">Dojazd</legend>
+            <div class="opts">
+              {offer.zones.map((z, i) => (
+                <label class="opt"><input type="radio" name="rzone" value={z.id} checked={i === 0} /><span><b>{z.label}</b></span></label>
+              ))}
+            </div>
+          </fieldset>
+        </form>
+      )}
+
+      <output class="result" aria-live="polite">
+        <span class="label">Szacunek</span>
+        <span class="price" data-price>–</span>
+        <span class="breakdown mono" data-breakdown></span>
+        <ul class="suggest" data-suggest hidden></ul>
+        <a class="btn" href={u('/oferta#zapytanie')} data-ask>Zapytaj o ten wariant <span class="arrow" aria-hidden="true">→</span></a>
+        {!full && <a class="link small" href={u('/oferta#wycena')}>Pełny kalkulator: nagłośnienie, dojazd, budżet →</a>}
+      </output>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ offer, base: import.meta.env.BASE_URL.replace(/\/$/, '') }}>
+  const box = document.querySelector('[data-calc]');
+  if (box) {
+    const full = box.dataset.full === '1';
+    const by = (list, id) => list.find(x => x.id === id);
+    const fmt = n => n.toLocaleString('pl-PL') + ' ' + offer.currency;
+    const range = (a, b) => a === b ? fmt(a) : `${a.toLocaleString('pl-PL')}–${fmt(b)}`;
+    const val = (form, name, fallback) => form?.querySelector(`[name="${name}"]:checked`)?.value ?? fallback;
+    const priceEl = box.querySelector('[data-price]');
+    const brEl = box.querySelector('[data-breakdown]');
+    const sugEl = box.querySelector('[data-suggest]');
+    const ask = box.querySelector('[data-ask]');
+    let mode = 'forward';
+
+    function forward() {
+      const f = box.querySelector('.forward');
+      const fmtSel = by(offer.formats, val(f, 'format', '60'));
+      const pill = by(offer.pills, val(f, 'pill', offer.pills[0].id));
+      const sound = by(offer.sound, val(f, 'sound', 'A'));
+      const zone = by(offer.zones, val(f, 'zone', '0'));
+      const parts = [fmtSel.price, sound.price, zone.price];
+      sugEl.hidden = true;
+      if (!zone.price) {
+        priceEl.textContent = `${range(fmtSel.price[0] + sound.price[0], fmtSel.price[1] + sound.price[1])} + dojazd`;
+        brEl.textContent = 'Dalej / za granicą: transport i nocleg wyceniamy indywidualnie.';
+      } else {
+        const lo = parts.reduce((s, p) => s + p[0], 0), hi = parts.reduce((s, p) => s + p[1], 0);
+        priceEl.textContent = range(lo, hi);
+        brEl.textContent = full
+          ? `występ ${range(...fmtSel.price)} · nagłośnienie ${sound.price[1] ? range(...sound.price) : 'w cenie'} · dojazd ${zone.price[1] ? range(...zone.price) : 'w cenie'}`
+          : `${fmtSel.label} · ${pill.name} · na waszym nagłośnieniu, do 15 km`;
+      }
+      const q = new URLSearchParams({ format: fmtSel.id, pill: pill.id, sound: sound.id, zone: zone.id });
+      ask.href = `${base}/oferta?${q}#zapytanie`;
+    }
+
+    function reverse() {
+      const f = box.querySelector('.reverse');
+      const budget = Number(f.querySelector('[name="budget"]').value || 0);
+      const zone = by(offer.zones, val(f, 'rzone', '0'));
+      const fits = [];
+      if (zone.price) {
+        for (const fm of offer.formats) for (const s of offer.sound) {
+          const lo = fm.price[0] + s.price[0] + zone.price[0];
+          if (lo <= budget) fits.push({ fm, s, lo });
+        }
+      }
+      fits.sort((a, b) => b.lo - a.lo);
+      sugEl.hidden = false; sugEl.innerHTML = '';
+      if (!zone.price) {
+        priceEl.textContent = 'Napisz do nas';
+        brEl.textContent = 'Przy dalszych wyjazdach liczymy transport i nocleg indywidualnie.';
+      } else if (!fits.length) {
+        const cheapest = offer.formats[0].price[0] + zone.price[0];
+        priceEl.textContent = 'Prawie!';
+        brEl.textContent = `Najkrótszy set zaczyna się od ok. ${fmt(cheapest)}. Napisz, pogadamy.`;
+      } else {
+        priceEl.textContent = `${fits.length} ${fits.length === 1 ? 'wariant' : 'warianty'}`;
+        brEl.textContent = `Za ${fmt(budget)} z dojazdem: ${zone.label.toLowerCase()}`;
+        fits.slice(0, 4).forEach(({ fm, s }) => {
+          const li = document.createElement('li');
+          li.textContent = `${fm.label} dowolnej Piguły · ${s.label.toLowerCase()}`;
+          sugEl.append(li);
+        });
+        const best = fits[0];
+        const upgrade = offer.sound.find(s => s.price[0] > best.s.price[0]);
+        if (upgrade) {
+          const li = document.createElement('li'); li.className = 'hint';
+          li.textContent = `Dorzuć ok. ${fmt(upgrade.price[0] - best.s.price[0])} → ${upgrade.label.toLowerCase()}`;
+          sugEl.append(li);
+        }
+      }
+      ask.href = `${base}/oferta?budget=${budget}&zone=${zone.id}#zapytanie`;
+    }
+
+    const update = () => (mode === 'forward' ? forward() : reverse());
+    box.addEventListener('input', update);
+    box.addEventListener('change', update);
+    box.querySelectorAll('[data-mode]').forEach(btn => btn.addEventListener('click', () => {
+      mode = btn.dataset.mode;
+      box.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-selected', String(b === btn)));
+      box.querySelectorAll('[data-panel]').forEach(p => (p.hidden = p.dataset.panel !== mode));
+      update();
+    }));
+    update();
+  }
+</script>
+
+<style>
+  .calc-box { display: grid; gap: 2rem; border: 1px solid var(--line); background: var(--surface); padding: clamp(1.25rem, 3vw, 2.5rem); }
+  @media (min-width: 60rem) { .calc-box { grid-template-columns: 1.5fr 1fr; align-items: start; } .modes { grid-column: 1 / -1; } }
+  .modes { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .modes button {
+    font-family: var(--f-mono); font-size: .8125rem; letter-spacing: .08em; text-transform: uppercase;
+    background: none; color: var(--muted); border: 1px solid var(--line); padding: .75rem 1rem; cursor: pointer; min-height: 2.75rem;
+  }
+  .modes button[aria-selected='true'] { color: var(--ink); background: var(--amber); border-color: var(--amber); }
+  form { display: grid; gap: 1.75rem; }
+  fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: .75rem; }
+  .opts { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+  .opt { position: relative; cursor: pointer; }
+  .opt input { position: absolute; opacity: 0; }
+  .opt span {
+    display: grid; gap: .2rem; height: 100%; padding: .85rem 1rem; border: 1px solid var(--line);
+    transition: border-color .2s, background .2s;
+  }
+  .opt b { font-family: var(--f-display); font-size: 1.375rem; text-transform: uppercase; letter-spacing: .02em; font-weight: 700; line-height: 1.05; }
+  .opt small { font-size: .8125rem; color: var(--muted); line-height: 1.35; }
+  .opt:hover span { border-color: var(--muted); }
+  .opt input:checked + span { border-color: var(--amber); background: rgb(238 142 55 / .08); }
+  .opt input:focus-visible + span { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .field { display: grid; gap: .5rem; }
+  .field input {
+    font: inherit; font-family: var(--f-display); font-size: 2.5rem; font-weight: 700; color: var(--cream);
+    background: var(--ink); border: 1px solid var(--line); padding: .5rem 1rem; width: 100%;
+  }
+  .result { display: grid; gap: .75rem; align-content: start; border-top: 1px solid var(--line); padding-top: 1.5rem; }
+  @media (min-width: 60rem) { .result { border-top: 0; border-left: 1px solid var(--line); padding: 0 0 0 2rem; position: sticky; top: 6rem; } }
+  .price { font-family: var(--f-display); font-weight: 800; font-size: clamp(2.5rem, 2rem + 3vw, 4rem); line-height: 1; color: var(--amber); }
+  .breakdown { font-size: .8125rem; color: var(--muted); line-height: 1.5; }
+  .suggest { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; font-size: .95em; }
+  .suggest li::before { content: '→ '; color: var(--amber); }
+  .suggest :global(li.hint) { color: var(--muted); font-style: italic; }
+  .result .btn { margin-top: .5rem; }
+  .small { font-size: .875rem; }
+</style>

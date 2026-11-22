@@ -1,0 +1,61 @@
+---
+import { Picture } from 'astro:assets';
+import pedals from '../assets/photos/pedals.jpg';
+const faq = [
+  ['Ile trwa montaż i próba?', 'Zwykle ok. 60–90 minut przed występem. Przy pełnym nagłośnieniu (wariant C) dłużej.'],
+  ['Czego potrzebujemy od Was?', 'Prądu przy scenie, kawałka płaskiej sceny i oświetlenia (swojego jeszcze nie mamy). Szczegóły w riderze.'],
+  ['Wystawiacie faktury?', 'Tak.'],
+  ['Gracie na weselach?', 'Tak, jako koncert: blok o północy, wejście, after. Nie obsługujemy całego wesela.'],
+  ['Jeździcie za granicę?', 'Tak, szczególnie na wydarzenia polonijne. Transport i nocleg wyceniamy indywidualnie.'],
+  ['Czy macie własne nagłośnienie?', 'Tak: mikser, kolumny i odsłuchy. Możemy też wpiąć się w Wasz system.'],
+];
+---
+<section class="section org" id="dla-organizatorow">
+  <div class="wrap grid">
+    <div>
+      <header class="section-head reveal">
+        <p class="label">Dla organizatorów</p>
+        <h2>Konkrety</h2>
+        <p>Wszystko, czego potrzebujesz, żeby powiedzieć przełożonemu „bierzemy ich”.</p>
+      </header>
+      <div class="downloads reveal">
+        <a class="btn btn--ghost" href="#" aria-disabled="true">Oferta PDF <span class="todo">wkrótce</span></a>
+        <a class="btn btn--ghost" href="#" aria-disabled="true">Rider techniczny <span class="todo">wkrótce</span></a>
+      </div>
+      <figure class="reveal">
+        <Picture src={pedals} alt="Efekty gitarowe na podłodze sali prób" formats={['avif', 'webp']} widths={[640, 1200]} sizes="(min-width: 60rem) 40vw, 100vw" />
+      </figure>
+    </div>
+    <dl class="faq reveal">
+      {faq.map(([q, a]) => (
+        <details>
+          <summary>{q}</summary>
+          <dd>{a}</dd>
+        </details>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .grid { display: grid; gap: 3rem; }
+  @media (min-width: 60rem) { .grid { grid-template-columns: 1fr 1.1fr; gap: 5rem; align-items: start; } }
+  .downloads { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 2.5rem; }
+  .downloads .todo { margin-left: .4rem; font-size: .7rem; }
+  figure { margin: 0; }
+  figure :global(img) { aspect-ratio: 16 / 9; object-fit: cover; opacity: .85; }
+  .faq { margin: 0; border-top: 1px solid var(--line); }
+  details { border-bottom: 1px solid var(--line); }
+  summary {
+    list-style: none; cursor: pointer; padding: 1.4rem 2.5rem 1.4rem 0; position: relative;
+    font-family: var(--f-display); font-weight: 700; font-size: 1.5rem; text-transform: uppercase; letter-spacing: .02em; line-height: 1.1;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '+'; position: absolute; right: 0; top: 50%; translate: 0 -50%;
+    font-family: var(--f-mono); font-size: 1.25rem; color: var(--amber); transition: rotate .3s var(--ease);
+  }
+  details[open] summary::after { rotate: 45deg; }
+  summary:hover { color: var(--amber); }
+  dd { margin: 0 0 1.5rem; color: var(--muted); max-width: 52ch; }
+</style>

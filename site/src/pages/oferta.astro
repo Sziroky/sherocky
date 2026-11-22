@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Pills from '../components/Pills.astro';
+import Calculator from '../components/Calculator.astro';
+import Organizers from '../components/Organizers.astro';
+import Contact from '../components/Contact.astro';
+---
+<Base title="Oferta i wycena · Sherocky" description="Trzy Piguły, formaty 30/60/90 min, kalkulator wyceny w obie strony, rider i kontakt.">
+  <div class="page-top wrap">
+    <p class="label">Oferta</p>
+    <h1>Rock'n'roll<br />na receptę</h1>
+    <p class="muted">Wybierz Pigułę, format i nagłośnienie, a kalkulator powie, ile to kosztuje. Albo odwrotnie: wpisz budżet i zobacz, co się zmieści.</p>
+  </div>
+  <Pills />
+  <Calculator full />
+  <Organizers />
+  <Contact />
+</Base>
+<style is:global>
+  .page-top { padding: 9rem 0 1rem; display: grid; gap: 1.25rem; }
+  .page-top h1 { font-size: clamp(3.5rem, 2rem + 8vw, 8rem); }
+  .page-top p.muted { font-size: 1.2em; }
+</style>

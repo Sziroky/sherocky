@@ -1,0 +1,9 @@
+{
+  "members": [
+    { "nick": "Sziroky", "name": "Piotr Sziroky", "role": "Wokal", "note": "Dołączył w wieku 16 lat. Rola: wokal i „różnie to bywa”." },
+    { "nick": "Dawid", "name": "Dawid Doszczątek", "role": "Gitara", "note": "Weteran Brand New Cadillacs. Odbiera telefon w sprawie koncertów." },
+    { "nick": "Wiechu", "name": "Łukasz Wieszołek", "role": "Gitara", "note": "Weteran Cadillaców. To on wziął młodego Sziroky'ego w obroty." },
+    { "nick": "Bartek", "name": "Bartek Zajączkowski", "role": "Bas", "note": "Weteran Cadillaców. Trzyma dół, żeby stoły nie odleciały za daleko." },
+    { "nick": "Cielak", "name": "Andrzej Cieślak", "role": "Perkusja", "note": "Weteran Cadillaców. Odpowiada za tempo i za to, żeby nikt nie siedział." }
+  ]
+}

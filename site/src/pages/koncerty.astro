@@ -1,0 +1,9 @@
+---
+import Base from '../layouts/Base.astro';
+import Concerts from '../components/Concerts.astro';
+---
+<Base title="Koncerty · Sherocky" description="Nadchodzące koncerty Sherocky i archiwum: Zagraliśmy.">
+  <div class="spacer" />
+  <Concerts showAll />
+</Base>
+<style is:global>.spacer { height: 4.5rem; }</style>

@@ -1,0 +1,13 @@
+{
+  "_uwaga": "DANE TESTOWE. Docelowo: Kalendarz Google (wydarzenia 'Koncert*'), pobierane po stronie serwera.",
+  "isExample": true,
+  "events": [
+    { "date": "2027-05-15T20:00", "title": "Majówka w klubie", "place": "Opole", "link": null, "private": false },
+    { "date": "2027-06-12T21:00", "title": "Wydarzenie prywatne", "place": "Kędzierzyn-Koźle", "link": null, "private": true },
+    { "date": "2027-06-27T19:00", "title": "Dni Gminy", "place": "Dobrzeń Wielki", "link": null, "private": false },
+    { "date": "2027-07-18T18:00", "title": "Zlot motocyklowy", "place": "Nysa", "link": null, "private": false },
+    { "date": "2026-08-23T20:00", "title": "Dożynki gminne", "place": "Opolszczyzna", "link": null, "private": false },
+    { "date": "2026-08-02T21:00", "title": "Zlot motocyklowy", "place": "Śląsk Opolski", "link": null, "private": false },
+    { "date": "2026-07-12T22:00", "title": "Wydarzenie prywatne", "place": "Opole", "link": null, "private": true }
+  ]
+}

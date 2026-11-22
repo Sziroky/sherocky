@@ -1,0 +1,104 @@
+---
+import offer from '../data/offer.json';
+const types = ['Dni miasta / gminy', 'Zlot motocyklowy', 'Wesele (koncert)', 'Klub / pub', 'Wydarzenie polonijne', 'Inne'];
+const tel = offer.contact.phone.replace(/\s/g, '');
+---
+<section class="section contact" id="kontakt">
+  <div class="wrap grid">
+    <div class="who reveal">
+      <p class="label">Kontakt</p>
+      <h2>Zadzwoń<br />do {offer.contact.personGen}</h2>
+      <p class="muted">Jedna osoba, wszystkie odpowiedzi. Termin, cena, nagłośnienie, dojazd: {offer.contact.person} ogarnia.</p>
+      <ul class="direct">
+        <li><a class="big" href={`tel:${tel}`}>{offer.contact.phone}</a></li>
+        <li><a class="link" href={`mailto:${offer.contact.email}`}>{offer.contact.email}</a></li>
+        <li><a class="link" href={`https://wa.me/${tel.replace('+', '')}`} rel="noopener">WhatsApp</a></li>
+      </ul>
+    </div>
+
+    <form class="form reveal" id="zapytanie" data-hide-sticky data-booking>
+      <p class="label">Zapytanie o koncert</p>
+      <div class="row">
+        <label><span>Data</span><input type="date" name="date" required /></label>
+        <label><span>Miejscowość</span><input name="place" required autocomplete="address-level2" /></label>
+      </div>
+      <label><span>Typ imprezy</span>
+        <select name="type">{types.map(t => <option>{t}</option>)}</select>
+      </label>
+      <div class="row">
+        <label><span>Format</span>
+          <select name="format">{offer.formats.map(f => <option value={f.id}>{f.label}</option>)}<option value="">Nie wiem jeszcze</option></select>
+        </label>
+        <label><span>Piguła</span>
+          <select name="pill">{offer.pills.map(p => <option value={p.id}>{p.name}</option>)}<option value="">Doradźcie</option></select>
+        </label>
+      </div>
+      <div class="row">
+        <label><span>Nagłośnienie</span>
+          <select name="sound">{offer.sound.map(s => <option value={s.id}>{s.id}: {s.label}</option>)}</select>
+        </label>
+        <label><span>Budżet (opcjonalnie)</span><input name="budget" inputmode="numeric" placeholder="np. 3000 zł" /></label>
+      </div>
+      <div class="row">
+        <label><span>Imię</span><input name="name" required autocomplete="name" /></label>
+        <label><span>Telefon</span><input name="phone" type="tel" required autocomplete="tel" /></label>
+      </div>
+      <label><span>E-mail</span><input name="email" type="email" autocomplete="email" /></label>
+      <label><span>Coś jeszcze?</span><textarea name="msg" rows="4" placeholder="Godzina, scena, liczba gości, cokolwiek, co pomoże w wycenie"></textarea></label>
+      <label class="hp" aria-hidden="true">Nie wypełniaj<input name="website" tabindex="-1" autocomplete="off" /></label>
+      <button class="btn" type="submit">Wyślij zapytanie <span class="arrow" aria-hidden="true">→</span></button>
+      <p class="mono note"><span class="preview-note">Podgląd</span> Formularz otwiera teraz wiadomość e-mail. Docelowo: zapis w arkuszu + mail do {offer.contact.personGen}.</p>
+      <p class="done" hidden data-done>Dzięki! {offer.contact.person} odezwie się w ciągu 24 godzin. W międzyczasie możesz zacząć rozciągać gardło.</p>
+    </form>
+  </div>
+</section>
+
+<script define:vars={{ email: offer.contact.email, formats: offer.formats, pills: offer.pills, sound: offer.sound }}>
+  const form = document.querySelector('[data-booking]');
+  if (form) {
+    // wstępne wypełnienie z kalkulatora (?format=60&pill=polska&sound=A&zone=0&budget=3000)
+    const q = new URLSearchParams(location.search);
+    for (const k of ['format', 'pill', 'sound']) if (q.get(k) && form.elements[k]) form.elements[k].value = q.get(k);
+    if (q.get('budget')) form.elements.budget.value = q.get('budget') + ' zł';
+    if (q.get('zone')) form.elements.msg.value = `Strefa dojazdu z kalkulatora: ${q.get('zone')}\n`;
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      if (form.elements.website.value) return;
+      const f = Object.fromEntries(new FormData(form));
+      const label = (list, id) => list.find(x => x.id === id)?.name ?? list.find(x => x.id === id)?.label ?? '–';
+      const body = [
+        `Data: ${f.date}`, `Miejscowość: ${f.place}`, `Typ: ${f.type}`,
+        `Format: ${label(formats, f.format)}`, `Piguła: ${label(pills, f.pill)}`, `Nagłośnienie: ${label(sound, f.sound)}`,
+        `Budżet: ${f.budget || '–'}`, '', `Imię: ${f.name}`, `Telefon: ${f.phone}`, `E-mail: ${f.email || '–'}`, '', f.msg || '',
+      ].join('\n');
+      location.href = `mailto:${email}?subject=${encodeURIComponent(`Zapytanie o koncert: ${f.date}, ${f.place}`)}&body=${encodeURIComponent(body)}`;
+      form.querySelector('[data-done]').hidden = false;
+    });
+  }
+</script>
+
+<style>
+  .grid { display: grid; gap: 3rem; }
+  @media (min-width: 60rem) { .grid { grid-template-columns: 1fr 1.2fr; gap: 5rem; align-items: start; } .who { position: sticky; top: 7rem; } }
+  .who { display: grid; gap: 1.25rem; }
+  .direct { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+  .big { font-family: var(--f-display); font-weight: 800; font-size: clamp(2.25rem, 1.8rem + 2vw, 3.25rem); text-decoration: none; color: var(--amber); letter-spacing: .02em; }
+  .big:hover { color: var(--red-light); }
+  .form { display: grid; gap: 1.1rem; background: var(--surface); border: 1px solid var(--line); padding: clamp(1.25rem, 3vw, 2.5rem); }
+  .row { display: grid; gap: 1.1rem; }
+  @media (min-width: 36rem) { .row { grid-template-columns: 1fr 1fr; } }
+  label { display: grid; gap: .4rem; }
+  label > span { font-family: var(--f-mono); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  input, select, textarea {
+    font: inherit; font-size: 1rem; color: var(--cream); background: var(--ink);
+    border: 1px solid var(--line); padding: .8rem .9rem; min-height: 3rem; width: 100%; border-radius: 0;
+    transition: border-color .2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--amber); outline: none; }
+  select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--amber) 50%), linear-gradient(135deg, var(--amber) 50%, transparent 50%); background-position: calc(100% - 1.1rem) 55%, calc(100% - .75rem) 55%; background-size: .35rem .35rem; background-repeat: no-repeat; padding-right: 2rem; }
+  .hp { position: absolute; left: -9999px; }
+  .form .btn { justify-self: start; margin-top: .5rem; }
+  .note { font-size: .75rem; color: var(--muted); margin: 0; line-height: 1.6; }
+  .done { color: var(--amber); margin: 0; }
+</style>
