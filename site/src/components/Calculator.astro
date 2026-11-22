@@ -146,7 +146,8 @@ const { full = false } = Astro.props;
         priceEl.textContent = 'Prawie!';
         brEl.textContent = `Najkrótszy set zaczyna się od ok. ${fmt(cheapest)}. Napisz, pogadamy.`;
       } else {
-        priceEl.textContent = `${fits.length} ${fits.length === 1 ? 'wariant' : 'warianty'}`;
+        const n = fits.length, d = n % 10, dd = n % 100;
+        priceEl.textContent = `${n} ${n === 1 ? 'wariant' : d >= 2 && d <= 4 && (dd < 12 || dd > 14) ? 'warianty' : 'wariantów'}`;
         brEl.textContent = `Za ${fmt(budget)} z dojazdem: ${zone.label.toLowerCase()}`;
         fits.slice(0, 4).forEach(({ fm, s }) => {
           const li = document.createElement('li');
